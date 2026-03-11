@@ -1,22 +1,39 @@
+using System.Diagnostics;
 using API.Interface;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 
 namespace API.Service
 {
     public class ContainerService : IContainerService
     {
-        public Task CreateContainer(string name)
+        private readonly BlobServiceClient _client;
+        public ContainerService(BlobServiceClient client)
         {
-            throw new NotImplementedException();
+            _client=client;
         }
 
-        public Task DeleteBlob(string name)
+        public async Task CreateContainer(string name)
         {
-            throw new NotImplementedException();
+            BlobContainerClient client = _client.GetBlobContainerClient(name);
+            await client.CreateIfNotExistsAsync(PublicAccessType.BlobContainer);
         }
 
-        public Task<List<string>> GetAllContainers()
+        public async Task DeleteBlob(string name)
         {
-            throw new NotImplementedException();
+            BlobContainerClient client = _client.GetBlobContainerClient(name);
+            await client.DeleteIfExistsAsync();
+        }
+
+        public async Task<List<string>> GetAllContainers()
+        {
+            List<String> ContainerName = new ();
+            await foreach(BlobContainerItem item in _client.GetBlobContainersAsync())
+            {
+                ContainerName.Add(item.Name);
+            }
+
+            return ContainerName;
         }
 
         public Task<List<string>> GetAllContainersAndBlobs()

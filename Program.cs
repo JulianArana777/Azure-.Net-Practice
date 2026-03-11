@@ -1,3 +1,5 @@
+using API.Interface;
+using API.Service;
 using Azure.Storage.Blobs;
 using DotNetEnv;
 
@@ -6,6 +8,7 @@ Env.Load();
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton(u=> new BlobServiceClient(Environment.GetEnvironmentVariable("BlobConnection")));
+builder.Services.AddSingleton<IContainerService,ContainerService>();
 
 var app = builder.Build();
 
