@@ -2,7 +2,43 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+
+    <div class="container-fluid">
+
+        <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+            Azure Storage App
+        </a>
+
+        <div class="navbar-nav">
+
+            <a class="nav-link"
+               asp-controller="Home"
+               asp-action="Index">
+                Home
+            </a>
+
+            <a class="nav-link"
+               asp-controller="Container"
+               asp-action="Index">
+                Containers
+            </a>
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+<!-- HOME CONTENT -->
+<div class="text-center mt-4">
+
     <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+
+    <p>
+        Manage your Azure Blob Storage containers and files.
+    </p>
+
 </div>

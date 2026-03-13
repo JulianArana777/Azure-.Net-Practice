@@ -28,11 +28,22 @@
                 <td>@container</td>
 
                 <td>
+
+                    <!-- BOTON MANAGE -->
+                    <a asp-controller="Blob"
+                       asp-action="Index"
+                       asp-route-containerName="@container"
+                       class="btn btn-primary">
+                        Manage
+                    </a>
+
+                    <!-- BOTON BORRAR -->
                     <a asp-action="Delete"
                        asp-route-name="@container"
                        class="btn btn-danger">
                         Borrar
                     </a>
+
                 </td>
             </tr>
         }

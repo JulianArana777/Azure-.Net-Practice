@@ -1,0 +1,86 @@
+@model List<string>
+
+@{
+    ViewData["Title"] = "Blobs";
+}
+
+<h2>Blobs en el container: @ViewBag.ContainerName</h2>
+
+<hr />
+
+<h3>Subir archivo</h3>
+
+<form asp-action="Upload" method="post" enctype="multipart/form-data">
+
+    <input type="hidden" name="containerName" value="@ViewBag.ContainerName" />
+
+    <input type="file" name="file" required />
+
+    <button type="submit">Subir</button>
+
+</form>
+
+<hr />
+
+<h3>Lista de archivos</h3>
+
+@if (Model != null && Model.Count > 0)
+{
+    <table class="table">
+
+        <thead>
+            <tr>
+                <th>Nombre del archivo</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        @foreach (var blob in Model)
+        {
+            <tr>
+
+                <td>@blob</td>
+
+                <td>
+
+                    <a asp-action="Open"
+                       asp-route-containerName="@ViewBag.ContainerName"
+                       asp-route-name="@blob">
+                        Ver
+                    </a>
+
+                    |
+
+                    <form asp-action="Delete"
+                          method="post"
+                          style="display:inline">
+
+                        <input type="hidden"
+                               name="containerName"
+                               value="@ViewBag.ContainerName" />
+
+                        <input type="hidden"
+                               name="name"
+                               value="@blob" />
+
+                        <button type="submit">
+                            Eliminar
+                        </button>
+
+                    </form>
+
+                </td>
+
+            </tr>
+        }
+
+        </tbody>
+
+    </table>
+}
+else
+{
+    <p>No hay blobs en este container.</p>
+}
