@@ -1,42 +1,66 @@
 using System.Diagnostics;
 using API.Interface;
+using API.MODEL;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 
 namespace API.Service
 {
-    public class ContainerService : IContainerService
+    public class BlobService : IBlobService
     {
         private readonly BlobServiceClient _client;
-        public ContainerService(BlobServiceClient client)
+        public BlobService(BlobServiceClient client)
         {
-            _client=client;
+            _client = client;
         }
 
-        public async Task CreateContainer(string name)
+        public async Task CreateBlob(string name, IFormFile file, string ContainerName, BlobModel blobmodel)
         {
-            BlobContainerClient client = _client.GetBlobContainerClient(name);
-            await client.CreateIfNotExistsAsync(PublicAccessType.BlobContainer);
-        }
-
-        public async Task DeleteContainer(string name)
-        {
-            BlobContainerClient client = _client.GetBlobContainerClient(name);
-            await client.DeleteIfExistsAsync();
-        }
-
-        public async Task<List<string>> GetAllContainers()
-        {
-            List<String> ContainerName = new ();
-            await foreach(BlobContainerItem item in _client.GetBlobContainersAsync())
+            BlobContainerClient blobContainerClient = _client.GetBlobContainerClient(ContainerName);
+            BlobClient blobClient = blobContainerClient.GetBlobClient(name);
+            var httpheaders = new Azure.Storage.Blobs.Models.BlobHttpHeaders()
             {
-                ContainerName.Add(item.Name);
+              ContentType = file.ContentType  
+            };
+            await blobClient.UploadAsync(file.OpenReadStream(),httpheaders);
+
+        }
+
+        public async Task DeleteBlob(string ContainerName, string Name)
+        {
+            BlobContainerClient blobContainerClient = _client.GetBlobContainerClient(ContainerName);
+            BlobClient blobClient = blobContainerClient.GetBlobClient(Name);
+            await blobClient.DeleteIfExistsAsync();
+
+        }
+
+        public async Task<string> GetABlob(string containerName, string name)
+        {
+            BlobContainerClient blobContainerClient = _client.GetBlobContainerClient(containerName);
+            BlobClient blobClient = blobContainerClient.GetBlobClient(name);
+
+            if (await blobClient.ExistsAsync())
+            {
+                return blobClient.Uri.AbsoluteUri;
             }
 
-            return ContainerName;
+            return null;
         }
 
-        public Task<List<string>> GetAllContainersAndBlobs()
+        public async Task<List<string>> GetAllBlobs(string ContainerName)
+        {
+            BlobContainerClient blobContainerClient = _client.GetBlobContainerClient(ContainerName);
+            var blobs = blobContainerClient.GetBlobsAsync();
+            List<string> blobnames = new List<string>();
+            await foreach (var blob in blobs)
+            {
+                blobnames.Add(blob.Name);
+            }
+            return blobnames;
+
+        }
+
+        public Task<List<BlobModel>> GetAllBlobsByUri(string ContainerName)
         {
             throw new NotImplementedException();
         }
