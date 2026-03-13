@@ -5,6 +5,6 @@ namespace API.Interface
         Task<List<string>> GetAllContainersAndBlobs();
         Task<List<string>> GetAllContainers();
         Task CreateContainer(string name);
-        Task DeleteBlob(string name);
+        Task DeleteContainer(string name);
     }
 }

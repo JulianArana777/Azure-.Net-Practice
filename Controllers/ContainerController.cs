@@ -14,7 +14,28 @@ namespace API.Controllers
          public async Task<IActionResult> Index()
         {
             var allcontainter = await _service.GetAllContainers();
-            return View();
+            return View(allcontainter);
+        }
+
+         [HttpPost]
+        public async Task<IActionResult> Create(string name)
+        {
+            if (!string.IsNullOrEmpty(name))
+            {
+                await _service.CreateContainer(name);
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        public async Task<IActionResult> Delete(string name)
+        {
+            if (!string.IsNullOrEmpty(name))
+            {
+                await _service.DeleteContainer(name);
+            }
+
+            return RedirectToAction("Index");
         }
     }
 }

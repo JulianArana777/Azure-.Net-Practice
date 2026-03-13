@@ -1,0 +1,40 @@
+@model List<string>
+
+<h2>Containers</h2>
+
+<h3>Crear Container</h3>
+
+<form asp-action="Create" method="post">
+    <input type="text" name="name" placeholder="Nombre del container" required />
+    <button type="submit">Crear</button>
+</form>
+
+<hr />
+
+<h3>Lista de Containers</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var container in Model)
+        {
+            <tr>
+                <td>@container</td>
+
+                <td>
+                    <a asp-action="Delete"
+                       asp-route-name="@container"
+                       class="btn btn-danger">
+                        Borrar
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
