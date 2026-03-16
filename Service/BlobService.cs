@@ -4,6 +4,8 @@ using API.Interface;
 using API.MODEL;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Azure.Storage.Blobs.Specialized;
+using Azure.Storage.Sas;
 
 namespace API.Service
 {
@@ -78,6 +80,19 @@ namespace API.Service
                 {
                     URL= blobclient.Uri.AbsoluteUri
                 };
+                if (blobclient.CanGenerateSasUri)
+                {
+                    BlobSasBuilder sas = new()
+                    {
+                        BlobContainerName = blobclient.GetParentBlobContainerClient().Name,
+                        BlobName = blobclient.Name,
+                        Resource="b",
+                        ExpiresOn = DateTimeOffset.UtcNow.AddHours(1)
+                    };
+                    sas.SetPermissions(BlobSasPermissions.Read);
+                    model.URL = blobclient.GenerateSasUri(sas).AbsoluteUri;
+                   
+                }
                 BlobProperties properties = await blobclient.GetPropertiesAsync();
                 if (properties.Metadata.ContainsKey("title"))
                 {
@@ -85,7 +100,7 @@ namespace API.Service
                 }
                 if (properties.Metadata.ContainsKey("comment"))
                 {
-                    model.Title = properties.Metadata["comment"];
+                    model.Comment = properties.Metadata["comment"];
                 }
 
                 names.Add(model);
