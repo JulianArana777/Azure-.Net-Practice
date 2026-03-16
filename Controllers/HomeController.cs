@@ -1,16 +1,19 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using DemoMvcApp.Models;
+using API.Interface;
 
 namespace DemoMvcApp.Controllers;
 
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
+    private readonly IBlobService _blob;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(ILogger<HomeController> logger,IBlobService blob)
     {
         _logger = logger;
+        _blob = blob;
     }
 
     public IActionResult Index()
@@ -18,9 +21,9 @@ public class HomeController : Controller
         return View();
     }
 
-    public IActionResult Privacy()
+    public  IActionResult Images()
     {
-        return View();
+        return View(_blob.GetAllBlobsByUri("dotnet-images").GetAwaiter().GetResult());
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

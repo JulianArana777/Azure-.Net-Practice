@@ -1,4 +1,5 @@
 using API.Interface;
+using API.MODEL;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -24,16 +25,23 @@ namespace API.Controllers
 
         // SUBIR ARCHIVO
         [HttpPost]
-        public async Task<IActionResult> Upload(string containerName, IFormFile file)
+        public async Task<IActionResult> Upload(string containerName, IFormFile file, BlobModel model)
         {
             if (file != null && file.Length > 0)
             {
-                await _service.CreateBlob(file.FileName, file, containerName, null);
+                await _service.CreateBlob(
+                    file.FileName,
+                    file,
+                    containerName,
+                    new Dictionary<string, string>
+                    {
+                { "title", model.Title },
+                { "comment", model.Comment }
+                    });
             }
 
             return RedirectToAction(nameof(Index), new { containerName });
         }
-
         // ELIMINAR BLOB
         [HttpPost]
         public async Task<IActionResult> Delete(string containerName, string name)
@@ -52,6 +60,6 @@ namespace API.Controllers
                 return NotFound();
 
             return Redirect(url);
-        }        
+        }
     }
 }

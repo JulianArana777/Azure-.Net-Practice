@@ -36,9 +36,31 @@ namespace API.Service
             return ContainerName;
         }
 
-        public Task<List<string>> GetAllContainersAndBlobs()
+        public async Task<List<string>> GetAllContainersAndBlobs()
         {
-            throw new NotImplementedException();
+            List<string> name=new();
+            name.Add("-----Account Name: "+_client.AccountName+"-----");
+            name.Add("----------------------------------------------------------------");
+            await foreach (BlobContainerItem item in _client.GetBlobContainersAsync())
+            {
+                name.Add("-----"+item.Name);
+                BlobContainerClient _Container = _client.GetBlobContainerClient(item.Name);
+                await foreach(BlobItem blobItem in _Container.GetBlobsAsync())
+                {
+                    var BlobCL = _Container.GetBlobClient(blobItem.Name);
+                    BlobProperties properties = await BlobCL.GetPropertiesAsync();
+                    string tempblop = blobItem.Name;
+                    if (properties.Metadata.ContainsKey("titleS"))
+                    {
+                        tempblop += "("+ properties.Metadata["title"] + ")";
+                    }
+                    name.Add(">>"+tempblop);
+
+                }
+                name.Add("----------------------------------------------------------------");
+            }
+            return name;
+
         }
     }
 }

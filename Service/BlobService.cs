@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Reflection.Metadata;
 using API.Interface;
 using API.MODEL;
 using Azure.Storage.Blobs;
@@ -14,16 +15,20 @@ namespace API.Service
             _client = client;
         }
 
-        public async Task CreateBlob(string name, IFormFile file, string ContainerName, BlobModel blobmodel)
+        public async Task CreateBlob(string name, IFormFile file, string containerName, Dictionary<string, string> metadata)
         {
-            BlobContainerClient blobContainerClient = _client.GetBlobContainerClient(ContainerName);
-            BlobClient blobClient = blobContainerClient.GetBlobClient(name);
-            var httpheaders = new Azure.Storage.Blobs.Models.BlobHttpHeaders()
-            {
-              ContentType = file.ContentType  
-            };
-            await blobClient.UploadAsync(file.OpenReadStream(),httpheaders);
+            var container = _client.GetBlobContainerClient(containerName);
 
+            var blob = container.GetBlobClient(name);
+
+            using var stream = file.OpenReadStream();
+
+            await blob.UploadAsync(stream, true);
+
+            if (metadata != null)
+            {
+                await blob.SetMetadataAsync(metadata);
+            }
         }
 
         public async Task DeleteBlob(string ContainerName, string Name)
@@ -60,9 +65,33 @@ namespace API.Service
 
         }
 
-        public Task<List<BlobModel>> GetAllBlobsByUri(string ContainerName)
+        public async Task<List<BlobModel>> GetAllBlobsByUri(string ContainerName)
         {
-            throw new NotImplementedException();
+            BlobContainerClient containerclient = _client.GetBlobContainerClient(ContainerName);
+            var blobs = containerclient.GetBlobsAsync();
+            List <BlobModel> names = new List<BlobModel>();
+
+            await foreach (var blob in blobs)
+            {
+                var blobclient = containerclient.GetBlobClient(blob.Name);
+                BlobModel model = new()
+                {
+                    URL= blobclient.Uri.AbsoluteUri
+                };
+                BlobProperties properties = await blobclient.GetPropertiesAsync();
+                if (properties.Metadata.ContainsKey("title"))
+                {
+                    model.Title = properties.Metadata["title"];
+                }
+                if (properties.Metadata.ContainsKey("comment"))
+                {
+                    model.Title = properties.Metadata["comment"];
+                }
+
+                names.Add(model);
+            }
+            return names;
+
         }
     }
 }
